@@ -1,7 +1,8 @@
 import 'package:cp6_apd/data/localsources/auth_local_storage.dart';
 import 'package:cp6_apd/views/dashboard/berita_panel.dart';
-
 import 'package:cp6_apd/views/dashboard/deteksi.dart';
+
+
 import 'package:cp6_apd/views/dashboard/login_page.dart';
 
 
@@ -77,7 +78,7 @@ class BerandaPanel extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (c) => CameraAccessPage()),
+                                builder: (c) => const YoloVideo()),
                           );
                         },
                       ),
@@ -283,19 +284,19 @@ class _InformasiPengguna extends StatelessWidget {
             ),
           ),
           GestureDetector(
-            onTap: ()  async{
-              // Proses logout jika pengguna menekan "Ya"
-             await AuthLocalStorage().removeToken();
-             Navigator.push(context,
-             MaterialPageRoute(builder: (context) {
-             return const LoginPage();
-             }));
-
-              // Implementasi aksi saat ikon bel berita di-tap
-            },
-            child: Image.asset(
-              'assets/sign-out.png',
-              width: 30,
+            onTap: () async {
+        // Proses logout jika pengguna menekan "Ya"
+        await AuthLocalStorage().removeToken();
+        
+        // Arahkan ke halaman login
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      },
+      child: Image.asset(
+        'assets/sign-out.png',
+        width: 30,
             ),
           )
         ],

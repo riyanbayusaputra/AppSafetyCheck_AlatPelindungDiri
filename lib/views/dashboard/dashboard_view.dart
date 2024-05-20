@@ -19,7 +19,7 @@ class DashboardView extends StatelessWidget {
        ArtikelKeselamatanKerja(),
       // const ChatBotPanel(),
       // const Test1(),
-      CameraAccessPage(),
+      YoloVideo(),
     ];
 
     return Consumer<DashboardProvider>(builder: (context, prov, w) {

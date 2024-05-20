@@ -1,86 +1,196 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_vision/flutter_vision.dart';
 import 'package:camera/camera.dart';
 
-void main() {
-  runApp(CameraAccessPage());
-}
+class YoloVideo extends StatefulWidget {
+  const YoloVideo({Key? key}) : super(key: key);
 
-class CameraAccessPage extends StatefulWidget {
   @override
-  _CameraAccessPageState createState() => _CameraAccessPageState();
+  State<YoloVideo> createState() => _YoloVideoState();
 }
 
-class _CameraAccessPageState extends State<CameraAccessPage> {
-  late List<CameraDescription> cameras;
+class _YoloVideoState extends State<YoloVideo> {
   late CameraController controller;
+  late FlutterVision vision;
+  late List<Map<String, dynamic>> yoloResults;
+  CameraImage? cameraImage;
+  bool isLoaded = false;
+  bool isDetecting = false;
+  double confidenceThreshold = 0.5;
+
+  late List<CameraDescription> cameras;
 
   @override
   void initState() {
     super.initState();
-    // Inisialisasi kamera dan controller
-    initializeCamera();
+    init();
   }
 
-  Future<void> initializeCamera() async {
-    // Mendapatkan daftar kamera yang tersedia
+  init() async {
     cameras = await availableCameras();
-    // Membuat controller untuk kamera belakang (index 0)
-    controller = CameraController(cameras[0], ResolutionPreset.medium);
-    // Menginisialisasi controller
-    await controller.initialize();
-    // Set state untuk membangun tampilan
-    if (mounted) {
-      setState(() {});
-    }
+    vision = FlutterVision();
+    controller = CameraController(cameras[0], ResolutionPreset.high);
+    controller.initialize().then((value) {
+      loadYoloModel().then((value) {
+        setState(() {
+          isLoaded = true;
+          isDetecting = false;
+          yoloResults = [];
+        });
+      });
+    });
   }
 
   @override
-  void dispose() {
-    // Hentikan controller ketika widget dihancurkan
-    controller.dispose();
+  void dispose() async {
     super.dispose();
+    controller.dispose();
+    await vision.closeYoloModel();
+  }
+
+  Future<void> loadYoloModel() async {
+    await vision.loadYoloModel(
+        labels: 'assets/label.txt',
+        modelPath: 'assets/best_float32.tflite',
+        modelVersion: "yolov8",
+        numThreads: 1,
+        useGpu: true);
+    setState(() {
+      isLoaded = true;
+    });
+  }
+
+  Future<void> yoloOnFrame(CameraImage cameraImage) async {
+    final result = await vision.yoloOnFrame(
+        bytesList: cameraImage.planes.map((plane) => plane.bytes).toList(),
+        imageHeight: cameraImage.height,
+        imageWidth: cameraImage.width,
+        iouThreshold: 0.4,
+        confThreshold: 0.4,
+        classThreshold: 0.5);
+    if (result.isNotEmpty) {
+      setState(() {
+        yoloResults = result;
+      });
+    }
+  }
+
+  Future<void> startDetection() async {
+    setState(() {
+      isDetecting = true;
+    });
+    if (controller.value.isStreamingImages) {
+      return;
+    }
+    await controller.startImageStream((image) async {
+      if (isDetecting) {
+        cameraImage = image;
+        yoloOnFrame(image);
+      }
+    });
+  }
+
+  Future<void> stopDetection() async {
+    setState(() {
+      isDetecting = false;
+      yoloResults.clear();
+    });
+  }
+
+  List<Widget> displayBoxesAroundRecognizedObjects(Size screen) {
+    if (yoloResults.isEmpty) return [];
+    double factorX = screen.width / (cameraImage?.height ?? 1);
+    double factorY = screen.height / (cameraImage?.width ?? 1);
+
+    Color colorPick = const Color.fromARGB(255, 50, 233, 30);
+
+    return yoloResults.map((result) {
+      double objectX = result["box"][0] * factorX;
+      double objectY = result["box"][1] * factorY;
+      double objectWidth = (result["box"][2] - result["box"][0]) * factorX;
+      double objectHeight = (result["box"][3] - result["box"][1]) * factorY;
+
+      return Positioned(
+        left: objectX,
+        top: objectY,
+        width: objectWidth,
+        height: objectHeight,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+            border: Border.all(color: Colors.pink, width: 2.0),
+          ),
+          child: Text(
+            "${result['tag']} ${(result['box'][4] * 100)}",
+            style: TextStyle(
+              background: Paint()..color = colorPick,
+              color: const Color.fromARGB(255, 115, 0, 255),
+              fontSize: 18.0,
+            ),
+          ),
+        ),
+      );
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.of(context).size;
+
+    if (!isLoaded) {
+      return Scaffold(
+        body: Center(
+          child: Text("Model not loaded, waiting for it"),
+        ),
+      );
+    }
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Camera Access'),
-      ),
-      body: Center(
-        child: controller != null && controller.value.isInitialized
-            ? CameraPreview(controller)
-            : CircularProgressIndicator(),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          try {
-            // Cek apakah controller sudah diinisialisasi
-            if (controller != null && controller.value.isInitialized) {
-              // Ambil foto
-              final image = await controller.takePicture();
-              // Tampilkan dialog dengan path foto
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: Text('Foto berhasil diambil!'),
-                  content: Text('Lokasi penyimpanan: ${image.path}'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text('OK'),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          AspectRatio(
+            aspectRatio: controller.value.aspectRatio,
+            child: CameraPreview(
+              controller,
+            ),
+          ),
+          ...displayBoxesAroundRecognizedObjects(size),
+          Positioned(
+            bottom: 75,
+            width: MediaQuery.of(context).size.width,
+            child: Container(
+              height: 80,
+              width: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                    width: 5, color: Colors.white, style: BorderStyle.solid),
+              ),
+              child: isDetecting
+                  ? IconButton(
+                      onPressed: () async {
+                        await stopDetection();
+                      },
+                      icon: const Icon(
+                        Icons.stop,
+                        color: Colors.red,
+                      ),
+                      iconSize: 50,
+                    )
+                  : IconButton(
+                      onPressed: () async {
+                        await startDetection();
+                      },
+                      icon: const Icon(
+                        Icons.play_arrow,
+                        color: Colors.white,
+                      ),
+                      iconSize: 50,
                     ),
-                  ],
-                ),
-              );
-            }
-          } catch (e) {
-            print('Error: $e');
-          }
-        },
-        child: Icon(Icons.camera),
+            ),
+          ),
+        ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

@@ -10,7 +10,6 @@ import 'package:cp6_apd/bloc/register/register_bloc.dart';
 
 import 'package:cp6_apd/views/dashboard/dashboard_view.dart';
 
-
 void main(List<String> args) {
   runApp(
     MultiProvider(

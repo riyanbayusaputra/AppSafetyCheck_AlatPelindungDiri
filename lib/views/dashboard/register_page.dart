@@ -1,13 +1,10 @@
-// ignore_for_file: camel_case_types, prefer_typing_uninitialized_variables
-
-
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cp6_apd/bloc/register/register_bloc.dart';
 import 'package:cp6_apd/bloc/register/register_event.dart';
 import 'package:cp6_apd/bloc/register/register_state.dart';
 import 'package:cp6_apd/data/models/requests/register_model.dart';
 import 'package:cp6_apd/views/dashboard/login_page.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -23,7 +20,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     nameController = TextEditingController();
     emailController = TextEditingController();
     passwordController = TextEditingController();
@@ -32,7 +28,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     nameController!.dispose();
     emailController!.dispose();
     passwordController!.dispose();
@@ -41,13 +36,18 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final double screenHeight = mediaQuery.size.height;
+    final double screenWidth = mediaQuery.size.width;
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
+          height: screenHeight,
+          width: screenWidth,
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage(
-                  'assets/bg.png'), // Ganti dengan path gambar latar belakang yang sesuai
+              image: AssetImage('assets/bg.png'), // Ganti dengan path gambar latar belakang yang sesuai
               fit: BoxFit.cover,
             ),
           ),
@@ -57,58 +57,59 @@ class _RegisterPageState extends State<RegisterPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(
-                    height: 50.0,
-                  ),
+                  const SizedBox(height: 50.0),
                   const Text(
                     "Register Page",
                     style: TextStyle(
                       fontSize: 24,
+                      fontWeight: FontWeight.bold,
                       color: Colors.black,
                     ),
                   ),
-                  const SizedBox(
-                    height: 16.0,
-                  ),
+                  const SizedBox(height: 16.0),
                   Image.asset(
                     'assets/logoAuth.png', // Ganti dengan path gambar yang sesuai
                     width: 200, // Sesuaikan lebar gambar sesuai kebutuhan
                     height: 250, // Sesuaikan tinggi gambar sesuai kebutuhan
                   ),
-                  const SizedBox(
-                    height: 16,
-                  ),
+                  const SizedBox(height: 16),
                   TextField(
-                    decoration: const InputDecoration(
-                      labelText: 'Name',
-                      border: OutlineInputBorder(),
-                    ),
                     controller: nameController,
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  TextField(
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: 'Name',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.8),
                     ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
                     controller: emailController,
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  TextField(
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.8),
                     ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
                     controller: passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.8),
+                    ),
                   ),
-                  const SizedBox(
-                    height: 16,
-                  ),
+                  const SizedBox(height: 16),
                   BlocConsumer<RegisterBloc, RegisterState>(
                     listener: (context, state) {
                       if (state is RegisterLoaded) {
@@ -117,14 +118,14 @@ class _RegisterPageState extends State<RegisterPage> {
                         passwordController!.clear();
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                              backgroundColor:
-                                  const Color.fromARGB(255, 0, 255, 8),
-                              content: Text('Email: berhasil didaftarkan')),
+                            backgroundColor: Colors.green,
+                            content: Text('Email berhasil didaftarkan'),
+                          ),
                         );
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) {
-                          return const LoginPage();
-                        }));
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => const LoginPage()),
+                        );
                       }
                     },
                     builder: (context, state) {
@@ -133,32 +134,48 @@ class _RegisterPageState extends State<RegisterPage> {
                           child: CircularProgressIndicator(),
                         );
                       }
-                      return ElevatedButton(
-                        onPressed: () {
-                          final requestModel = RegisterModel(
-                            name: nameController!.text,
-                            email: emailController!.text,
-                            password: passwordController!.text,
-                          );
-
-                          context
-                              .read<RegisterBloc>()
-                              .add(SaveRegisterEvent(request: requestModel));
-                        },
-                        child: const Text('Register'),
+                      return SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            final requestModel = RegisterModel(
+                              name: nameController!.text,
+                              email: emailController!.text,
+                              password: passwordController!.text,
+                            );
+                            context.read<RegisterBloc>().add(SaveRegisterEvent(request: requestModel));
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                          child: const Text(
+                            'Register',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                       );
                     },
                   ),
+                  const SizedBox(height: 16),
                   InkWell(
                     onTap: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) {
-                        return const LoginPage();
-                      }));
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginPage()),
+                      );
                     },
                     child: const Text(
                       'Sudah Punya Akun? Login',
-                      style: TextStyle(decoration: TextDecoration.underline),
+                      style: TextStyle(
+                        decoration: TextDecoration.underline,
+                        color: Colors.blue,
+                      ),
                     ),
                   ),
                 ],
