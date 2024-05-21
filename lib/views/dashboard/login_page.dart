@@ -29,7 +29,7 @@ class _LoginPageState extends State<LoginPage> {
   void isLogin() async {
     final isTokenExist = await AuthLocalStorage().isTokenExist();
     if (isTokenExist) {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) {
         return const DashboardView();
       }));
     }
@@ -111,7 +111,7 @@ class _FormLogin extends StatelessWidget {
                       content: Text('Success login'),
                     ),
                   );
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
                     return const DashboardView();
                   }));
                 } else if (state is LoginError) {

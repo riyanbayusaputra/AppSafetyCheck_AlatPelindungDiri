@@ -9,9 +9,9 @@ class AuthLocalStorage {
     return token;
   }
 
-  Future<String> getToken() async {
+  Future<String?> getToken() async {
     final pref = await SharedPreferences.getInstance();
-    return pref.getString(tokenKey)!;
+    return pref.getString(tokenKey);
   }
 
   Future<bool> isTokenExist() async {
@@ -19,8 +19,8 @@ class AuthLocalStorage {
     return pref.getString(tokenKey) != null;
   }
 
-  Future<bool> removeToken() async {
+  Future<void> removeToken() async {
     final pref = await SharedPreferences.getInstance();
-    return pref.remove(tokenKey);
+    await pref.remove(tokenKey);
   }
 }

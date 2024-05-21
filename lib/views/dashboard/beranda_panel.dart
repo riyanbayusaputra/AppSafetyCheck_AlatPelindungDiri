@@ -7,6 +7,7 @@ import 'package:cp6_apd/views/dashboard/login_page.dart';
 
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
@@ -247,7 +248,7 @@ class _ItemBerita extends StatelessWidget {
 }
 
 class _InformasiPengguna extends StatelessWidget {
-  const _InformasiPengguna({Key? key});
+  const _InformasiPengguna({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -264,46 +265,45 @@ class _InformasiPengguna extends StatelessWidget {
               fit: BoxFit.cover,
             ),
           ),
-          const SizedBox(
-            width: 15,
-          ),
+          const SizedBox(width: 15),
           const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Text(
-                //   'hi, Riyan',
-                //   style: TextStyle(color: Colors.white, fontSize: 19),
-                // ),
                 Text(
-                  'Hai, Selamat Datang di SafetyCheck: Sistem Deteksi Alat Pelindung Diri (APD) ',
+                  'Hai, Selamat Datang di SafetyCheck: Sistem Deteksi Alat Pelindung Diri (APD)',
                   style: TextStyle(color: Colors.white, fontSize: 18),
-                )
+                ),
               ],
             ),
           ),
           GestureDetector(
             onTap: () async {
-        // Proses logout jika pengguna menekan "Ya"
-        await AuthLocalStorage().removeToken();
-        
-        // Arahkan ke halaman login
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-        );
-      },
-      child: Image.asset(
-        'assets/sign-out.png',
-        width: 30,
+              print("Sign Out tapped");
+
+              // Proses logout jika pengguna menekan "Sign Out"
+              await AuthLocalStorage().removeToken();
+              print("Token removed");
+
+              // Arahkan ke halaman login
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+              );
+              print("Navigated to login page");
+            },
+            child: Image.asset(
+              'assets/sign-out.png',
+              width: 30,
             ),
-          )
+          ),
         ],
       ),
     );
   }
 }
+
 
 class _BackgroundDashboard extends StatelessWidget {
   const _BackgroundDashboard({Key? key});
