@@ -247,7 +247,7 @@ class _LogoAplikasi extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 50),
       child: Image.asset(
-        'assets/logoAuth.png', // Update with your logo path
+        'assets/APD.jpg', // Update with your logo path
         width: 150,
       ),
     );
@@ -266,7 +266,7 @@ class _JudulFormLogin extends StatelessWidget {
       child: Column(
         children: const [
           Text(
-            'APLIKASI DETEKSI',
+            'APLIKASI DETEKSI Apd',
             style: TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.bold,
@@ -274,7 +274,7 @@ class _JudulFormLogin extends StatelessWidget {
             ),
           ),
           Text(
-            'HAMA TANAMAN SAWI',
+            'Safetycheck',
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,

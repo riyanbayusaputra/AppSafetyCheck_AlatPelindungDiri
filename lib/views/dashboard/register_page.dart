@@ -36,19 +36,15 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final double screenHeight = mediaQuery.size.height;
-    final double screenWidth = mediaQuery.size.width;
-
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
-          height: screenHeight,
-          width: screenWidth,
+          height: MediaQuery.of(context).size.height,
           decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/bg.png'), // Ganti dengan path gambar latar belakang yang sesuai
-              fit: BoxFit.cover,
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.blue.shade400, Colors.green.shade300],
             ),
           ),
           child: Center(
@@ -68,7 +64,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   const SizedBox(height: 16.0),
                   Image.asset(
-                    'assets/logoAuth.png', // Ganti dengan path gambar yang sesuai
+                    'assets/APD.jpg', // Ganti dengan path gambar yang sesuai
                     width: 200, // Sesuaikan lebar gambar sesuai kebutuhan
                     height: 250, // Sesuaikan tinggi gambar sesuai kebutuhan
                   ),
