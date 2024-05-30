@@ -51,6 +51,9 @@ dependencies:
   flutter_bloc: ^8.1.5
   shared_preferences: ^2.1.1
   flutter_vision: ^1.1.4
+  flutter_inappwebview: ^6.0.0
+  image_picker: ^1.1.1
+  carousel_slider: ^4.0.0
 
 dev_dependencies:
   flutter_test:

@@ -1,12 +1,15 @@
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cp6_apd/bloc/profil/profile_bloc.dart';
 import 'package:cp6_apd/data/localsources/auth_local_storage.dart';
 import 'package:cp6_apd/views/dashboard/berita_panel.dart';
 import 'package:cp6_apd/views/dashboard/deteksi.dart';
-
+import 'package:cp6_apd/views/dashboard/deteksi_vieweb.dart';
 
 import 'package:cp6_apd/views/dashboard/login_page.dart';
-
+import 'package:cp6_apd/views/dashboard/profil_page.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:url_launcher/url_launcher.dart';
@@ -83,15 +86,15 @@ class BerandaPanel extends StatelessWidget {
                           );
                         },
                       ),
-                      // _TombolMenu(
-                      //   gambar: 'assets/management.png',
-                      //   onTap: () {
-                      //     Navigator.push(
-                      //       context,
-                      //       MaterialPageRoute(builder: (c) => const Test1()),
-                      //     );
-                      //   },
-                      // ),
+                      _TombolMenu(
+                        gambar: 'assets/management.png',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (c) => CameraView()),
+                          );
+                        },
+                      ),
                     ],
                   ),
                   Padding(
@@ -134,24 +137,29 @@ class _TombolMenu extends StatelessWidget {
         margin: const EdgeInsets.all(8),
         child: Image.asset(
           gambar,
-          width: 40,
+          width: 30,
         ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: const Color(0xdadadaff),
+          color: const Color(0xFFdadada),
           boxShadow: const [
             BoxShadow(
               color: Color.fromARGB(125, 112, 158, 158),
               blurRadius: 2,
               spreadRadius: 2,
               offset: Offset(2, 2),
-            )
+            ),
           ],
+          border: Border.all(
+            color: Colors.white, // Warna border putih
+            width: 2, // Lebar border
+          ),
         ),
       ),
     );
   }
 }
+
 
 class _ListBerita extends StatelessWidget {
   const _ListBerita({Key? key});
@@ -187,20 +195,22 @@ class _ListBerita extends StatelessWidget {
       },
     ];
 
-    return SizedBox(
-      width: double.infinity,
-      height: 160,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: daftarBerita.length,
-        itemBuilder: (context, index) {
-          return _ItemBerita(
-            assetgambar: daftarBerita[index]['assetgambar']!,
-            judulBerita: daftarBerita[index]['judul']!,
-            deskripsiBerita: daftarBerita[index]['deskripsi']!,
-          );
-        },
+    return CarouselSlider(
+      options: CarouselOptions(
+        height: 160.0,
+        enlargeCenterPage: true,
+        autoPlay: true,
+        aspectRatio: 16/9,
+        autoPlayCurve: Curves.fastOutSlowIn,
+        enableInfiniteScroll: true,
+        autoPlayAnimationDuration: Duration(milliseconds: 800),
+        viewportFraction: 0.8,
       ),
+      items: daftarBerita.map((item) => _ItemBerita(
+        assetgambar: item['assetgambar']!,
+        judulBerita: item['judul']!,
+        deskripsiBerita: item['deskripsi']!,
+      )).toList(),
     );
   }
 }
@@ -237,7 +247,7 @@ class _ItemBerita extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           child: Image.asset(
             assetgambar,
-            width: 250,
+            width: 450,
             height: 130,
             fit: BoxFit.cover,
           ),
@@ -252,53 +262,127 @@ class _InformasiPengguna extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.read<ProfileBloc>().add(GetProfileEvent());
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(22, 60, 22, 10),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(100),
-            child: Image.asset(
-              'assets/potoprofil.jpg',
-              height: 50,
-              width: 50,
-              fit: BoxFit.cover,
-            ),
-          ),
-          const SizedBox(width: 15),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+      child: BlocBuilder<ProfileBloc, ProfileState>(
+        builder: (context, state) {
+          if (state is ProfileLoading) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          if (state is ProfileLoaded) {
+            final email = state.profile.email ?? '';
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Hai, Selamat Datang di SafetyCheck: Sistem Deteksi Alat Pelindung Diri (APD)',
-                  style: TextStyle(color: Colors.white, fontSize: 18),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProfilePage(),
+                      ),
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white,
+                            width: 2.0,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child: Image.network(
+                            state.profile.avatar ??
+                                'https://gravatar.com/avatar/80e178804e023758d3e51ae6e296861f?s=400&d=robohash&r=x',
+                            height: 50,
+                            width: 50,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 15),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Hai, Welcome Back',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            email,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () async {
+                    print("Sign Out tapped");
+
+                    // Proses logout jika pengguna menekan "Sign Out"
+                    await AuthLocalStorage().removeToken();
+                    print("Token removed");
+
+                    // Arahkan ke halaman login
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
+                    );
+                    print("Navigated to login page");
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.3),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(8),
+                    child: Icon(
+                      Icons.logout,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
                 ),
               ],
-            ),
-          ),
-          GestureDetector(
-            onTap: () async {
-              print("Sign Out tapped");
-
-              // Proses logout jika pengguna menekan "Sign Out"
-              await AuthLocalStorage().removeToken();
-              print("Token removed");
-
-              // Arahkan ke halaman login
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginPage()),
-              );
-              print("Navigated to login page");
-            },
-            child: Image.asset(
-              'assets/sign-out.png',
-              width: 30,
-            ),
-          ),
-        ],
+            );
+          }
+          return Container();
+        },
       ),
     );
   }
@@ -306,18 +390,36 @@ class _InformasiPengguna extends StatelessWidget {
 
 
 class _BackgroundDashboard extends StatelessWidget {
-  const _BackgroundDashboard({Key? key});
+  const _BackgroundDashboard({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset(
-      'assets/b1.jpg',
-      height: 300,
-      width: double.infinity,
-      fit: BoxFit.cover,
+    return Stack(
+      children: [
+        Image.asset(
+          'assets/b1.jpg',
+          height: 300,
+          width: double.infinity,
+          fit: BoxFit.cover,
+        ),
+        Container(
+          height: 300,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.orange.withOpacity(0.6),
+                Colors.blue.withOpacity(0.6),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
+
 
 class DetailBeritaPage extends StatelessWidget {
   final String assetgambar;
@@ -443,12 +545,13 @@ class _ListPenjualAPD extends StatelessWidget {
     );
   }
 
-  Widget _buildPenjualAPD(
-      {required String nameShop,
-      required String rating,
-      required String jamBuka,
-      required String googleMapsUrl,
-      required String imagePath}) {
+  Widget _buildPenjualAPD({
+    required String nameShop,
+    required String rating,
+    required String jamBuka,
+    required String googleMapsUrl,
+    required String imagePath,
+  }) {
     return PenjualAPD(
       nameShop: nameShop,
       rating: rating,
@@ -464,7 +567,7 @@ class PenjualAPD extends StatelessWidget {
   final String rating;
   final String jamBuka;
   final String googleMapsUrl;
-  final String imagePath; // Tambahkan parameter imagePath
+  final String imagePath;
 
   const PenjualAPD({
     Key? key,
@@ -472,7 +575,7 @@ class PenjualAPD extends StatelessWidget {
     required this.rating,
     required this.jamBuka,
     required this.googleMapsUrl,
-    required this.imagePath, // Tambahkan imagePath ke dalam constructor
+    required this.imagePath,
   }) : super(key: key);
 
   void _openGoogleMaps(BuildContext context) async {
@@ -491,36 +594,64 @@ class PenjualAPD extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.all(8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      elevation: 4,
       child: InkWell(
         onTap: () => _openGoogleMaps(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.asset(
-              imagePath, // Gunakan imagePath yang diterima dari parameter
-              width: double.infinity,
-              height: 150,
-              fit: BoxFit.cover,
+            ClipRRect(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(15),
+                topRight: Radius.circular(15),
+              ),
+              child: Image.asset(
+                imagePath,
+                width: double.infinity,
+                height: 150,
+                fit: BoxFit.cover,
+              ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(10.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     nameShop,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(Icons.star, color: Colors.amber),
+                      Icon(
+                        Icons.star,
+                        color: Colors.amber,
+                        size: 20,
+                      ),
                       SizedBox(width: 4),
-                      Text(rating),
+                      Text(
+                        rating,
+                        style: TextStyle(
+                          fontSize: 14,
+                        ),
+                      ),
                     ],
                   ),
                   SizedBox(height: 4),
-                  Text("Jam Buka: $jamBuka"),
+                  Text(
+                    "Jam Buka: $jamBuka",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
                 ],
               ),
             ),

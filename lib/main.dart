@@ -1,4 +1,8 @@
+import 'package:cp6_apd/bloc/change_password/change_password_bloc.dart';
+import 'package:cp6_apd/bloc/forgot_password/forgot_password_bloc.dart';
+import 'package:cp6_apd/bloc/profil/profile_bloc.dart';
 import 'package:cp6_apd/data/datasources/auth_datasources.dart';
+import 'package:cp6_apd/data/localsources/auth_local_storage.dart';
 import 'package:cp6_apd/providers/dashboard_provider.dart';
 import 'package:cp6_apd/views/dashboard/login_page.dart';
 import 'package:cp6_apd/views/dashboard/started.dart';
@@ -30,6 +34,18 @@ void main(List<String> args) {
         BlocProvider(
           create: (context) => LoginBloc(AuthDatasource()),
         ),
+        BlocProvider(
+          create: (context) => ProfileBloc(AuthDatasource()),
+        ),
+        BlocProvider(
+          create: (context) => ChangePasswordBloc(AuthDatasource()),
+        ),
+        BlocProvider(
+          create: (context) => ForgotPasswordBloc(AuthDatasource()),
+        ),
+        //  BlocProvider(
+        //   create: (context) => ChangePasswordBloc(AuthDatasource()),
+        // ),
         // BlocProvider untuk Bloc lainnya bisa ditambahkan di sini jika diperlukan
       ],
       child: const MyApp(), // Memisahkan MaterialApp ke widget terpisah
@@ -43,7 +59,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: const StartedPage(),
+      home: const LoginPage(),
       debugShowCheckedModeBanner: false,
     );
   }

@@ -1,10 +1,111 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cp6_apd/bloc/login/login_bloc.dart';
 import 'package:cp6_apd/data/localsources/auth_local_storage.dart';
 import 'package:cp6_apd/data/models/requests/login_model.dart';
 import 'package:cp6_apd/views/dashboard/dashboard_view.dart';
 import 'package:cp6_apd/views/dashboard/register_page.dart';
+
+// Define the TextInput and PasswordInput widgets with animations
+class TextInput extends StatelessWidget {
+  final IconData icon;
+  final String hint;
+  final TextInputType inputType;
+  final TextInputAction inputAction;
+  final TextEditingController controller;
+
+  const TextInput({
+    required this.icon,
+    required this.hint,
+    required this.inputType,
+    required this.inputAction,
+    required this.controller,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.8),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          prefixIcon: Icon(icon, color: Colors.grey),
+          hintText: hint,
+          hintStyle: TextStyle(color: Colors.grey),
+        ),
+        keyboardType: inputType,
+        textInputAction: inputAction,
+      ),
+    );
+  }
+}
+
+class PasswordInput extends StatelessWidget {
+  final IconData icon;
+  final String hint;
+  final TextInputAction inputAction;
+  final TextEditingController controller;
+
+  const PasswordInput({
+    required this.icon,
+    required this.hint,
+    required this.inputAction,
+    required this.controller,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.8),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          prefixIcon: Icon(icon, color: Colors.grey),
+          hintText: hint,
+          hintStyle: TextStyle(color: Colors.grey),
+        ),
+        obscureText: true,
+        textInputAction: inputAction,
+      ),
+    );
+  }
+}
+
+class RoundedButton extends StatelessWidget {
+  final String buttonText;
+  final VoidCallback onPressed;
+
+  const RoundedButton({
+    required this.buttonText,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(25),
+        ),
+        backgroundColor: Colors.blueAccent, // Changed button color
+        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+      ),
+      onPressed: onPressed,
+      child: Text(buttonText, style: TextStyle(fontSize: 20, color: Colors.white)),
+    );
+  }
+}
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -13,9 +114,11 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixin {
   TextEditingController? emailController;
   TextEditingController? passwordController;
+  late AnimationController _controller;
+  late Animation<double> _animation;
 
   @override
   void initState() {
@@ -23,15 +126,25 @@ class _LoginPageState extends State<LoginPage> {
     passwordController = TextEditingController();
     isLogin();
     Future.delayed(const Duration(seconds: 2));
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 2),
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+    _controller.forward();
     super.initState();
   }
 
   void isLogin() async {
     final isTokenExist = await AuthLocalStorage().isTokenExist();
     if (isTokenExist) {
-      Navigator.push(context, MaterialPageRoute(builder: (context) {
-        return const DashboardView();
-      }));
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const DashboardView()),
+      );
     }
   }
 
@@ -39,250 +152,153 @@ class _LoginPageState extends State<LoginPage> {
   void dispose() {
     emailController!.dispose();
     passwordController!.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Container(
-          height: MediaQuery.of(context).size.height,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Colors.blue.shade400, Colors.green.shade300],
-            ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const _JudulFormLogin(),
-              const _LogoAplikasi(),
-              _FormLogin(emailController: emailController, passwordController: passwordController),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.blue.shade700,
+              Colors.blue.shade400,
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _FormLogin extends StatelessWidget {
-  final TextEditingController? emailController;
-  final TextEditingController? passwordController;
-
-  const _FormLogin({
-    Key? key,
-    this.emailController,
-    this.passwordController,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-      color: Colors.white,
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            InputField(
-              label: 'Email',
-              controller: emailController,
-            ),
-            InputField(
-              label: 'Password',
-              obscure: true,
-              controller: passwordController,
-            ),
-            const SizedBox(height: 20),
-            BlocConsumer<LoginBloc, LoginState>(
-              listener: (context, state) {
-                if (state is LoginLoaded) {
-                  emailController!.clear();
-                  passwordController!.clear();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      backgroundColor: Colors.blue,
-                      content: Text('Success login'),
+        child: Center(
+          child: SingleChildScrollView(
+            child: SafeArea(
+              child: FadeTransition(
+                opacity: _animation,
+                child: Column(
+                  children: [
+                    SizedBox(height: 50),
+                    Container(
+                      height: 150,
+                      child: Center(
+                        child: Text(
+                          'Aplikasi Deteksi APD',
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                     ),
-                  );
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return const DashboardView();
-                  }));
-                } else if (state is LoginError) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      backgroundColor: Colors.red,
-                      content: Text(state.message),
-                    ),
-                  );
-                }
-              },
-              builder: (context, state) {
-                if (state is LoginLoading) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-                return _TombolLogin(
-                  emailController: emailController,
-                  passwordController: passwordController,
-                );
-              },
-            ),
-            const SizedBox(height: 15),
-            Center(
-              child: InkWell(
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return const RegisterPage();
-                  }));
-                },
-                child: const Text(
-                  'Belum Punya Akun? Register',
-                  style: TextStyle(decoration: TextDecoration.underline),
+                    SizedBox(height: 50),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 40),
+                      child: Column(
+                        children: [
+                          TextInput(
+                            icon: FontAwesomeIcons.solidEnvelope,
+                            hint: 'Email',
+                            inputType: TextInputType.emailAddress,
+                            inputAction: TextInputAction.next,
+                            controller: emailController!,
+                          ),
+                          PasswordInput(
+                            icon: FontAwesomeIcons.lock,
+                            hint: 'Password',
+                            inputAction: TextInputAction.done,
+                            controller: passwordController!,
+                          ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () {},
+                              child: Text(
+                                'Forgot Password?',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                          BlocConsumer<LoginBloc, LoginState>(
+                            listener: (context, state) {
+                              if (state is LoginLoaded) {
+                                emailController!.clear();
+                                passwordController!.clear();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    backgroundColor: Colors.blue,
+                                    content: Text('Success login'),
+                                  ),
+                                );
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const DashboardView()),
+                                );
+                              } else if (state is LoginError) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    backgroundColor: Colors.red,
+                                    content: Text(state.message),
+                                  ),
+                                );
+                              }
+                            },
+                            builder: (context, state) {
+                              if (state is LoginLoading) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                              return RoundedButton(
+                                buttonText: 'Login',
+                                onPressed: () {
+                                  final requestModel = LoginModel(
+                                    email: emailController!.text,
+                                    password: passwordController!.text,
+                                  );
+                                  context.read<LoginBloc>().add(DoLoginEvent(loginModel: requestModel));
+                                },
+                              );
+                            },
+                          ),
+                          SizedBox(height: 30),
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                                return const RegisterPage();
+                              }));
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(color: Colors.white, width: 1),
+                                ),
+                              ),
+                              child: Text(
+                                'Create New Account',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 30),
+                        ],
+                      ),
+                    )
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _TombolLogin extends StatelessWidget {
-  final TextEditingController? emailController;
-  final TextEditingController? passwordController;
-
-  const _TombolLogin({
-    Key? key,
-    this.emailController,
-    this.passwordController,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.orange,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-      ),
-      onPressed: () {
-        final requestModel = LoginModel(
-          email: emailController!.text,
-          password: passwordController!.text,
-        );
-        context.read<LoginBloc>().add(DoLoginEvent(loginModel: requestModel));
-      },
-      child: const Text(
-        'Login',
-        style: TextStyle(fontSize: 20),
-      ),
-    );
-  }
-}
-
-class InputField extends StatelessWidget {
-  final String label;
-  final bool obscure;
-  final TextEditingController? controller;
-
-  const InputField({
-    Key? key,
-    required this.label,
-    this.obscure = false,
-    this.controller,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          obscureText: obscure,
-          style: const TextStyle(color: Colors.black),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.grey[200],
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-          ),
-        ),
-        const SizedBox(height: 15),
-      ],
-    );
-  }
-}
-
-class _LogoAplikasi extends StatelessWidget {
-  const _LogoAplikasi({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 50),
-      child: Image.asset(
-        'assets/APD.jpg', // Update with your logo path
-        width: 150,
       ),
     );
   }
 }
 
-class _JudulFormLogin extends StatelessWidget {
-  const _JudulFormLogin({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 50),
-      child: Column(
-        children: const [
-          Text(
-            'APLIKASI DETEKSI Apd',
-            style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          Text(
-            'Safetycheck',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
