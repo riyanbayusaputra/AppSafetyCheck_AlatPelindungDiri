@@ -1,5 +1,6 @@
 import 'package:cp6_apd/bloc/profil/profile_bloc.dart';
 import 'package:cp6_apd/data/localsources/auth_local_storage.dart';
+import 'package:cp6_apd/views/dashboard/ResetPasswordScreen%20.dart';
 import 'package:cp6_apd/views/dashboard/change_password.dart';
 import 'package:cp6_apd/views/dashboard/edit_profil_page.dart';
 import 'package:cp6_apd/views/dashboard/forgot_password_page.dart';
@@ -162,6 +163,18 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                              ProfileWidget(
                             icon: Icons.email_outlined,
+                            title: 'Reset Password',
+                            onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          ResetPasswordPage()),
+                                );
+                              },
+                             ),
+                             ProfileWidget(
+                            icon: Icons.email_outlined,
                             title: 'Forgot Password',
                             onTap: () {
                                 Navigator.push(
@@ -172,45 +185,45 @@ class _ProfilePageState extends State<ProfilePage> {
                                 );
                               },
                              ),
-                            ProfileWidget(
-                              icon: Icons.logout,
-                              title: 'Log Out',
-                              onTap: () async {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text("Confirmation"),
-                                      content: const Text(
-                                          "Are you sure you want to log out?"),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                          child: const Text("Cancel"),
-                                        ),
-                                        TextButton(
-                                          onPressed: () async {
-                                            await AuthLocalStorage()
-                                                .removeToken();
-                                            Navigator.pushAndRemoveUntil(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    const LoginPage(),
-                                              ),
-                                              (Route<dynamic> route) => false,
-                                            );
-                                          },
-                                          child: const Text("Log Out"),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              },
-                            ),
+                            // ProfileWidget(
+                            //   icon: Icons.logout,
+                            //   title: 'Log Out',
+                            //   onTap: () async {
+                            //     showDialog(
+                            //       context: context,
+                            //       builder: (BuildContext context) {
+                            //         return AlertDialog(
+                            //           title: const Text("Confirmation"),
+                            //           content: const Text(
+                            //               "Are you sure you want to log out?"),
+                            //           actions: [
+                            //             TextButton(
+                            //               onPressed: () {
+                            //                 Navigator.pop(context);
+                            //               },
+                            //               child: const Text("Cancel"),
+                            //             ),
+                            //             TextButton(
+                            //               onPressed: () async {
+                            //                 await AuthLocalStorage()
+                            //                     .removeToken();
+                            //                 Navigator.pushAndRemoveUntil(
+                            //                   context,
+                            //                   MaterialPageRoute(
+                            //                     builder: (context) =>
+                            //                         const LoginPage(),
+                            //                   ),
+                            //                   (Route<dynamic> route) => false,
+                            //                 );
+                            //               },
+                            //               child: const Text("Log Out"),
+                            //             ),
+                            //           ],
+                            //         );
+                            //       },
+                            //     );
+                            //   },
+                            // ),
                           ],
                         ),
                       ),

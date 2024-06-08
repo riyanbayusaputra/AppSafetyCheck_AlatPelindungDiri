@@ -1,3 +1,4 @@
+import 'package:cp6_apd/views/dashboard/forgot_password_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -182,7 +183,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                       height: 150,
                       child: Center(
                         child: Text(
-                          'Aplikasi Deteksi APD',
+                          'SafetyCheck APD',
                           style: TextStyle(
                             fontSize: 30,
                             fontWeight: FontWeight.bold,
@@ -212,7 +213,14 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                           Align(
                             alignment: Alignment.centerRight,
                             child: TextButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          ForgotPasswordPage()),
+                                );
+                              },
                               child: Text(
                                 'Forgot Password?',
                                 style: TextStyle(

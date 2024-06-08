@@ -15,7 +15,7 @@ import '../models/response/register_response_model.dart';
 import 'package:http/http.dart' as http;
 
 class AuthDatasource {
-  final baseUrl = 'http://192.168.10.81:5000';
+  final baseUrl ='http://192.168.202.81:5000';
 
   Future<RegisterResponseModel> register(RegisterModel registerModel) async {
     final response = await http.post(

@@ -1,6 +1,7 @@
 import 'package:cp6_apd/bloc/change_password/change_password_bloc.dart';
 import 'package:cp6_apd/bloc/forgot_password/forgot_password_bloc.dart';
 import 'package:cp6_apd/bloc/profil/profile_bloc.dart';
+import 'package:cp6_apd/bloc/reset_password/reset_password_bloc.dart';
 import 'package:cp6_apd/data/datasources/auth_datasources.dart';
 import 'package:cp6_apd/data/localsources/auth_local_storage.dart';
 import 'package:cp6_apd/providers/dashboard_provider.dart';
@@ -43,9 +44,9 @@ void main(List<String> args) {
         BlocProvider(
           create: (context) => ForgotPasswordBloc(AuthDatasource()),
         ),
-        //  BlocProvider(
-        //   create: (context) => ChangePasswordBloc(AuthDatasource()),
-        // ),
+        BlocProvider<ResetPasswordBloc>(
+          create: (context) => ResetPasswordBloc(),
+        ),
         // BlocProvider untuk Bloc lainnya bisa ditambahkan di sini jika diperlukan
       ],
       child: const MyApp(), // Memisahkan MaterialApp ke widget terpisah

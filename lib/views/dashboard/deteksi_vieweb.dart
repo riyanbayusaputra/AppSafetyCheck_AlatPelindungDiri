@@ -7,7 +7,7 @@ class CameraView extends StatefulWidget {
 }
 
 class _CameraViewState extends State<CameraView> {
-  final String url ='http://192.168.106.81:5000/video_feed'; // Replace with your Flask server URL
+  final String url ='https://910c-103-166-147-253.ngrok-free.app/video_feed'; // Replace with your Flask server URL
 
   @override
   Widget build(BuildContext context) {

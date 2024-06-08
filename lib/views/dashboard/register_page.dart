@@ -172,7 +172,7 @@ class _RegisterPageState extends State<RegisterPage> with SingleTickerProviderSt
                       height: 150,
                       child: Center(
                         child: Text(
-                          'Aplikasi Deteksi APD',
+                          'SafetyCheck APD',
                           style: TextStyle(
                             fontSize: 30,
                             fontWeight: FontWeight.bold,
